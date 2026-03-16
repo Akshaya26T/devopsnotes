@@ -1,5 +1,8 @@
 FROM ubuntu:24.04
 
+ARG AGENT_VERSION=4.269.0
+ARG TARGETARCH
+
 LABEL version="1.0"
 LABEL release-notes="docker image for running azure devops deployment agent inside a container"
 LABEL maintainer="Singam Tech Inc (https://github.com/Singam-Tech-Inc/)"
@@ -19,11 +22,19 @@ RUN apt update && apt install -y \
 # Create non-root user
 RUN useradd -m agent
 
-# Download and extract the agent
-RUN mkdir -p /opt/agent && cd /opt/agent && \
-    curl -fkSL -o vstsagent.tar.gz https://download.agent.dev.azure.com/agent/4.269.0/vsts-agent-linux-arm64-4.269.0.tar.gz && \
-    tar -zxvf vstsagent.tar.gz && \
-    rm vstsagent.tar.gz
+# Download and extract the agent matching the build architecture.
+# TARGETARCH comes from Docker BuildKit (e.g. amd64, arm64).
+RUN set -e; \
+        case "${TARGETARCH}" in \
+            amd64) AGENT_ARCH="x64" ;; \
+            arm64) AGENT_ARCH="arm64" ;; \
+            *) echo "Unsupported TARGETARCH: ${TARGETARCH}"; exit 1 ;; \
+        esac; \
+        mkdir -p /opt/agent; \
+        cd /opt/agent; \
+        curl -fkSL -o vstsagent.tar.gz "https://download.agent.dev.azure.com/agent/${AGENT_VERSION}/vsts-agent-linux-${AGENT_ARCH}-${AGENT_VERSION}.tar.gz"; \
+        tar -zxvf vstsagent.tar.gz; \
+        rm vstsagent.tar.gz
 
 # Copy and make the script executable
 COPY deployagent.sh /deployagent.sh

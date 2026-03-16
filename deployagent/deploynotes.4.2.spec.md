@@ -1,0 +1,1 @@
+If you want strict non-root runtime, I can refactor to an init-container style so the main service runs fully as agent afterward.

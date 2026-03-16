@@ -1,7 +1,10 @@
 services:
   azdevops-agent:
-    build: .
-    image: azdevopsdeploymentagent:1.0
+    build:
+      context: .
+      args:
+        TARGETARCH: ${TARGETARCH}
+    image: ${IMAGE_REPO:-azdevopsdeploymentagent}:${VERSION}-${TARGETARCH}
     container_name: azdevops-agent
     restart: always
     volumes:
