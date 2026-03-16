@@ -20,34 +20,17 @@ tar -zxvf vstsagent.tar.gz
 : "${AZP_POOL:=Default}"
 : "${AZP_AGENT_NAME:=agent-${HOSTNAME}}"
 
-# Configure and run the agent.
-if [ -x "$(command -v systemctl)" ]; then
-  ./config.sh \
-    --environment \
-    --environmentname "${AZP_ENVIRONMENT}" \
-    --acceptteeeula \
-    --agent "${AZP_AGENT_NAME}" \
-    --url "${AZP_URL}" \
-    --work _work \
-    --projectname "${AZP_PROJECT}" \
-    --auth PAT \
-    --token "${AZP_TOKEN}" \
-    --runasservice \
-    --pool "${AZP_POOL}"
+# Configure and run the agent (container-friendly).
+./config.sh \
+  --environment \
+  --environmentname "${AZP_ENVIRONMENT}" \
+  --acceptteeeula \
+  --agent "${AZP_AGENT_NAME}" \
+  --url "${AZP_URL}" \
+  --work _work \
+  --projectname "${AZP_PROJECT}" \
+  --auth PAT \
+  --token "${AZP_TOKEN}"
 
-  sudo ./svc.sh install
-  sudo ./svc.sh start
-else
-  ./config.sh \
-    --environment \
-    --environmentname "${AZP_ENVIRONMENT}" \
-    --acceptteeeula \
-    --agent "${AZP_AGENT_NAME}" \
-    --url "${AZP_URL}" \
-    --work _work \
-    --projectname "${AZP_PROJECT}" \
-    --auth PAT \
-    --token "${AZP_TOKEN}"
-
-  ./run.sh
-fi
+# In containers, run.sh keeps the agent process in the foreground.
+./run.sh

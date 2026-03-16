@@ -1,0 +1,1 @@
+update docker compose file to read environment variables from prod.env
