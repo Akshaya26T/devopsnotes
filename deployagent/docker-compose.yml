@@ -1,16 +1,14 @@
-version: '3.9'
-
 services:
   azdevops-agent:
     build: .
+    image: azdevopsdeploymentagent:1.0
     container_name: azdevops-agent
     restart: always
     volumes:
-      - volumea:/azagent
+      - deploymentdevagent:/azagent
     env_file:
-      - prod.env
-    command: ["/bin/bash", "/deployagent.sh"]
+      - ./prod.env
 
 volumes:
-  volumea:
+  deploymentdevagent:
     external: true
