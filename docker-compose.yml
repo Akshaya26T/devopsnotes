@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  azdevops-agent:
+    build: .
+    container_name: azdevops-agent
+    restart: always
+    volumes:
+      - volumea:/azagent
+    environment:
+      # Replace the following values or set them in an env file / CI pipeline
+      - AZP_URL=https://dev.azure.com/yourOrg
+      - AZP_TOKEN=yourPAT
+      - AZP_POOL=Default
+      - AZP_AGENT_NAME=${HOSTNAME}
+      - AZP_ENVIRONMENT=development
+      - AZP_PROJECT=shelton-webapp
+    command: ["/bin/bash", "/deployagent.sh"]
+
+volumes:
+  volumea:
+    external: true

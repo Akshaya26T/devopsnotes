@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# This script is intended to run inside a container.
+# It installs the Azure DevOps agent into /azagent and starts it as a long-running process.
+
+AGENT_DIR=/azagent
+mkdir -p "$AGENT_DIR"
+cd "$AGENT_DIR"
+
+# Download and extract the agent.
+curl -fkSL -o vstsagent.tar.gz https://download.agent.dev.azure.com/agent/4.269.0/vsts-agent-linux-x64-4.269.0.tar.gz
+tar -zxvf vstsagent.tar.gz
+
+# Required environment variables
+: "${AZP_URL:?AZP_URL is required (e.g. https://dev.azure.com/yourOrg)}"
+: "${AZP_TOKEN:?AZP_TOKEN is required (your PAT)}"
+: "${AZP_PROJECT:?AZP_PROJECT is required (project name)}"
+: "${AZP_ENVIRONMENT:=development}"
+: "${AZP_POOL:=Default}"
+: "${AZP_AGENT_NAME:=agent-${HOSTNAME}}"
+
+# Configure and run the agent.
+if [ -x "$(command -v systemctl)" ]; then
+  ./config.sh \
+    --environment \
+    --environmentname "${AZP_ENVIRONMENT}" \
+    --acceptteeeula \
+    --agent "${AZP_AGENT_NAME}" \
+    --url "${AZP_URL}" \
+    --work _work \
+    --projectname "${AZP_PROJECT}" \
+    --auth PAT \
+    --token "${AZP_TOKEN}" \
+    --runasservice \
+    --pool "${AZP_POOL}"
+
+  sudo ./svc.sh install
+  sudo ./svc.sh start
+else
+  ./config.sh \
+    --environment \
+    --environmentname "${AZP_ENVIRONMENT}" \
+    --acceptteeeula \
+    --agent "${AZP_AGENT_NAME}" \
+    --url "${AZP_URL}" \
+    --work _work \
+    --projectname "${AZP_PROJECT}" \
+    --auth PAT \
+    --token "${AZP_TOKEN}"
+
+  ./run.sh
+fi
