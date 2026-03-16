@@ -20,17 +20,24 @@ tar -zxvf vstsagent.tar.gz
 : "${AZP_POOL:=Default}"
 : "${AZP_AGENT_NAME:=agent-${HOSTNAME}}"
 
-# Configure and run the agent (container-friendly).
-./config.sh \
-  --environment \
-  --environmentname "${AZP_ENVIRONMENT}" \
-  --acceptteeeula \
-  --agent "${AZP_AGENT_NAME}" \
-  --url "${AZP_URL}" \
-  --work _work \
-  --projectname "${AZP_PROJECT}" \
-  --auth PAT \
-  --token "${AZP_TOKEN}"
+# Configure the agent only if it isn't already configured.
+# The agent writes a `.agent` file when config is complete.
+if [ ! -f ".agent" ]; then
+  echo "Configuring Azure DevOps agent..."
+  ./config.sh \
+    --environment \
+    --environmentname "${AZP_ENVIRONMENT}" \
+    --acceptteeeula \
+    --agent "${AZP_AGENT_NAME}" \
+    --url "${AZP_URL}" \
+    --work _work \
+    --projectname "${AZP_PROJECT}" \
+    --auth PAT \
+    --token "${AZP_TOKEN}"
+else
+  echo "Agent already configured; skipping config step."
+fi
 
 # In containers, run.sh keeps the agent process in the foreground.
-./run.sh
+# Use exec so the agent process becomes PID 1 (best practice for containers).
+exec ./run.sh

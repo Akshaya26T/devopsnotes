@@ -1,0 +1,1 @@
+update the script to run config only if config does not already exists, and also does run.sh runs the agent as the daemon service? If not update so
