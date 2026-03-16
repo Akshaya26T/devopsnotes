@@ -17,7 +17,6 @@ tar -zxvf vstsagent.tar.gz
 : "${AZP_TOKEN:?AZP_TOKEN is required (your PAT)}"
 : "${AZP_PROJECT:?AZP_PROJECT is required (project name)}"
 : "${AZP_ENVIRONMENT:=development}"
-: "${AZP_POOL:=Default}"
 : "${AZP_AGENT_NAME:=agent-${HOSTNAME}}"
 
 # Configure the agent only if it isn't already configured.
